@@ -1,0 +1,38 @@
+[
+  {
+    "identification": "1020435978",
+    "identificationType": "CC",
+    "FirstName": "Iván",
+    "SecondName": "Darío",
+    "firstSurname": "Arroyave",
+    "secondSurname": "Arboleda",
+    "age": 30,
+    "sex": "Masculino",
+    "weight": 101,
+    "phoneNumber": "+57 3104893645"
+  },
+  {
+    "identification": "1920195999",
+    "identificationType": "CC",
+    "FirstName": "Jorje",
+    "SecondName": "",
+    "firstSurname": "Morales",
+    "secondSurname": "Vientos",
+    "age": 45,
+    "sex": "Masculino",
+    "weight": 80,
+    "phoneNumber": "+57 3019875632"
+  },
+  {
+    "identification": "1056478877",
+    "identificationType": "CC",
+    "FirstName": "María",
+    "SecondName": "Dolores",
+    "firstSurname": "Vargas",
+    "secondSurname": "Moreno",
+    "age": 28,
+    "sex": "Femenino",
+    "weight": 60,
+    "phoneNumber": "+57 3014964589"
+  }
+]

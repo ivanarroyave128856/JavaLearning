@@ -1,0 +1,17 @@
+[
+  {
+    "technicalConfigurationId": "basic-001",
+
+    "numberOfEconomicSeatClass" : 27,
+    "priceForEconomicSeatClass" : 129999.99,
+    "numberOfEconomicSeatClassForSmokers" : 4,
+    "economicSmokerTax" : 10000.00,
+
+    "numberOfPremiumSeatClass" : 8,
+    "priceForPremiumSeatClass" : 199999.99,
+    "numberOfPremiumSeatClassForSmokers" : 3,
+    "premiumSmokerTax" : 15000.00,
+
+    "seatsTotal" : 35
+  }
+]
