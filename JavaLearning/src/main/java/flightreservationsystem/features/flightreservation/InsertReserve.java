@@ -13,18 +13,18 @@ import static flightreservationsystem.features.flightreservation.FlightState.fli
 import static flightreservationsystem.util.Util.getBasicFileContent;
 import static flightreservationsystem.util.Util.saveFile;
 
-public class FlightReservation {
+public class InsertReserve {
 
     public static void flightReservation() throws IOException {
 
         if(numberOfReservations() >= numberOfAllowedReservations()) {
-            System.out.println("*****EL VUELO EST? COMPLETO*****" + NEW_LINE);
+            System.out.println("*****EL VUELO ESTÁ COMPLETO*****" + NEW_LINE);
             return;
         }
         else
             flightStatus();
 
-        System.out.println("****POR FAVOR INGRESE LA INFORMACI?N SOLICITADA****" + NEW_LINE);
+        System.out.println("****POR FAVOR INGRESE LA INFORMACIÓN SOLICITADA****" + NEW_LINE);
 
         Seat seat = getInfoOfSeatFromScreen();
         Person person = getInfoOfPersonFromScreen();

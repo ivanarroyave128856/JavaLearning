@@ -2,7 +2,7 @@ import java.io.IOException;
 import java.util.Scanner;
 import static flightreservationsystem.features.applicationmanagement.countrymanagement.ShowCountries.showCountries;
 import static flightreservationsystem.features.flightreservation.CancelReserve.calcelReserve;
-import static flightreservationsystem.features.flightreservation.FlightReservation.flightReservation;
+import static flightreservationsystem.features.flightreservation.InsertReserve.flightReservation;
 import static flightreservationsystem.features.flightreservation.FlightState.flightStatus;
 import static flightreservationsystem.features.flightreservation.ShowTechnicalFlightDetail.showTechnicalFlightDetail;
 import static flightreservationsystem.features.flightreservation.UpdateReserve.updateReserve;
