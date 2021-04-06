@@ -6,9 +6,9 @@ import flightreservationsystem.models.Person;
 import flightreservationsystem.models.Seat;
 import flightreservationsystem.models.TechnicalFlightDetails;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Scanner;
 import static flightreservationsystem.constants.Constants.*;
+import static flightreservationsystem.features.Core.saveChanges;
 import static flightreservationsystem.features.flightreservation.FlightState.flightStatus;
 import static flightreservationsystem.util.Util.getBasicFileContent;
 import static flightreservationsystem.util.Util.saveFile;
@@ -30,7 +30,7 @@ public class InsertReserve {
         Person person = getInfoOfPersonFromScreen();
         FlightStatus[] flightStatus = getInfoOfFlight();
 
-        doReservation(withFollowingInformation(flightStatus, seat, person));
+        saveChanges(withFollowingInformation(flightStatus, seat, person));
 
         if(verifyReservation(flightStatus))
             System.out.println("*****Vuelo Reservado*****");
@@ -128,10 +128,7 @@ public class InsertReserve {
         return flightStatus;
     }
 
-    private static void doReservation(FlightStatus[] flightStatus) throws IOException {
-        Gson gson = new Gson();
-        saveFile(CONTROL_FLIGHT_RESERVATION_JSON_PATH, gson.toJson(flightStatus));
-    }
+
 
     private static boolean verifyReservation(FlightStatus[] flightStatus) throws IOException {
         Gson gson = new Gson();

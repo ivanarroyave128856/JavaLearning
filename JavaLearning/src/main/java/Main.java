@@ -1,7 +1,6 @@
 import java.io.IOException;
 import java.util.Scanner;
 import static flightreservationsystem.features.applicationmanagement.countrymanagement.ShowCountries.showCountries;
-import static flightreservationsystem.features.flightreservation.CancelReserve.calcelReserve;
 import static flightreservationsystem.features.flightreservation.InsertReserve.flightReservation;
 import static flightreservationsystem.features.flightreservation.FlightState.flightStatus;
 import static flightreservationsystem.features.flightreservation.ShowTechnicalFlightDetail.showTechnicalFlightDetail;
@@ -65,7 +64,7 @@ public class Main {
                     updateReserve();
                     break;
                 case 5:
-                    calcelReserve();
+                    //calcelReserve();
                     break;
                 case 6:
                     System.out.println("Ha salido de la reserva de vuelo.\n\r");

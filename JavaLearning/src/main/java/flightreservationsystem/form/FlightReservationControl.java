@@ -2,14 +2,16 @@ package flightreservationsystem.form;
 
 import flightreservationsystem.features.*;
 import flightreservationsystem.models.FlightStatus;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+
 import static flightreservationsystem.constants.ControlFlightReservationTitles.*;
 import static flightreservationsystem.features.Core.getInfoOfFlight;
-import static flightreservationsystem.features.flightreservation.CancelReserve.calcelReserve;
+import static flightreservationsystem.features.flightreservation.CancelReserve.calcelReservation;
 import static flightreservationsystem.features.flightreservation.InsertReserve.flightReservation;
 import static flightreservationsystem.features.flightreservation.UpdateReserve.updateReserve;
 import static javax.swing.JOptionPane.YES_NO_OPTION;
@@ -253,7 +255,21 @@ public class FlightReservationControl extends JFrame {
                 J_OPTION_PANE_SHOW_CONFIRM_DIALOG_ALERT_TITLE, YES_NO_OPTION) == J_OPTION_PANE_SHOW_NO_OPTION)
             return;
 
-        calcelReserve();
+        calcelReservation(ofSelectedRow());
+        loadFlightInfo();
+        buildInsertReservationButton();
+        buildCancelReservationButton();
+        buildUpdateReservationButton();
+        flightStatusInfo.repaint();
+    }
+
+    private String ofSelectedRow(){
+        int seatColumnIndex = 0;
+        return (((DefaultTableModel)flightStatusInfo.getModel()).getDataVector().get(flightStatusInfo.getSelectedRow()).toArray())[seatColumnIndex].toString();
+    }
+
+    private Object[] selectedRow(){
+        return ((DefaultTableModel)flightStatusInfo.getModel()).getDataVector().get(flightStatusInfo.getSelectedRow()).toArray();
     }
 
     private void buildUpdateReservationButton(){
