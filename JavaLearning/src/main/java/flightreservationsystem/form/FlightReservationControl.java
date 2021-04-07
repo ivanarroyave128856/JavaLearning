@@ -16,6 +16,8 @@ import static flightreservationsystem.features.flightreservation.InsertReserve.f
 import static flightreservationsystem.features.flightreservation.UpdateReserve.updateReserve;
 import static javax.swing.JOptionPane.YES_NO_OPTION;
 import static javax.swing.JOptionPane.showConfirmDialog;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.apache.commons.lang3.StringUtils.isNumeric;
 
 public class FlightReservationControl extends JFrame {
     private JPanel mainPanel;
@@ -26,11 +28,20 @@ public class FlightReservationControl extends JFrame {
     private JTextPane textPaneMoreFlightInfo;
     private JScrollPane scrollPaneFlightStatusInfo;
     private static final String SEPARATOR = ": ";
-    private static final String NEW_LINE = "\r";
+    private static final String NEW_LINE = "\n";
     private static final String SI = "Si";
     private static final String NO = "No";
+    private static final int BUSY_INDEX = 3;
     private static final String J_OPTION_PANE_SHOW_CONFIRM_DIALOG_ALERT_TITLE = "Flight reservation control";
     private static final int J_OPTION_PANE_SHOW_NO_OPTION = 1;
+    private static final String CC = "CC";
+    private static final String RCN = "RCN";
+    private static final String CE = "CE";
+    private static final String PAS = "PAS";
+    private static final String IDENTIFICATION_TYPE_REGEX = "^(CC)$|^(RCN)$|^(CE)$|^(PAS)$";
+    private static final String SEX_F = "F";
+    private static final String SEX_M = "M";
+    private static final String SEX_TYPE_REGEX = "^(F)$|^(M)$";
 
     public FlightReservationControl() throws IOException {
         setup();
@@ -42,16 +53,13 @@ public class FlightReservationControl extends JFrame {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-        frame.setSize(1100, 700);
+        frame.setSize(1350, 700);
     }
 
     private void setup() throws IOException{
         loadBasicFlightInfo();
         loadMoreBasicFlightInfo();
-        loadFlightInfo();
-        buildInsertReservationButton();
-        buildCancelReservationButton();
-        buildUpdateReservationButton();
+        LoadDataOfJTable();
     }
 
     private void loadBasicFlightInfo() throws IOException {
@@ -159,10 +167,12 @@ public class FlightReservationControl extends JFrame {
 
     private void loadFlightInfo() throws IOException {
         flightStatusInfo.setModel(fillDefaultTableModel());
-        flightStatusInfo.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        flightStatusInfo.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         flightStatusInfo.getTableHeader().setReorderingAllowed(false);
         flightStatusInfo.getTableHeader().setVisible(true);
         flightStatusInfo.setFillsViewportHeight(true);
+        flightStatusInfo.setAutoCreateRowSorter(false);
+        flightStatusInfo.setUpdateSelectionOnSort(false);
     }
 
     private DefaultTableModel fillDefaultTableModel() throws IOException {
@@ -174,7 +184,10 @@ public class FlightReservationControl extends JFrame {
         defaultTableModel.addColumn(IS_PREMIUM.getValue());
         defaultTableModel.addColumn(IS_BUSY.getValue());
         //Person information.
-        defaultTableModel.addColumn(PERSON_NAME.getValue());
+        defaultTableModel.addColumn(FIRST_NAME.getValue());
+        defaultTableModel.addColumn(SECOND_NAME.getValue());
+        defaultTableModel.addColumn(FIRST_SURNAME.getValue());
+        defaultTableModel.addColumn(SECOND_SURNAME.getValue());
         defaultTableModel.addColumn(PERSON_ID_TYPE.getValue());
         defaultTableModel.addColumn(PERSON_ID.getValue());
         defaultTableModel.addColumn(AGE.getValue());
@@ -190,22 +203,23 @@ public class FlightReservationControl extends JFrame {
         //Add rows values into JTable.
         for (FlightStatus flightState : flightStatus) {
             //Columns data (The last 3 positions no mentioned here are for operations like update, edit and insert).
-            Object[] data = new Object[14];
-
+            Object[] data = new Object[17];
+            //Seat information.
             data[0] = flightState.getSeat().getId();
             data[1] = flightState.getSeat().isSmoking() ? SI : NO;
             data[2] = flightState.getSeat().isPremium() ? SI : NO;
             data[3] = flightState.getSeat().isBusy() ? SI : NO;
-            data[4] = (flightState.getPerson().getFirstName() + " " +
-                    flightState.getPerson().getSecondName() + " " +
-                    flightState.getPerson().getFirstSurname() + " " +
-                    flightState.getPerson().getSecondSurname());
-            data[5] = flightState.getPerson().getIdentificationType();
-            data[6] = flightState.getPerson().getIdentification();
-            data[7] = flightState.getPerson().getAge();
-            data[8] = flightState.getPerson().getSex();
-            data[9] = flightState.getPerson().getWeight();
-            data[10] = flightState.getPerson().getPhoneNumber();
+            //Person information.
+            data[4] = flightState.getPerson().getFirstName();
+            data[5] = flightState.getPerson().getSecondName();
+            data[6] = flightState.getPerson().getFirstSurname();
+            data[7] = flightState.getPerson().getSecondSurname();
+            data[8] = flightState.getPerson().getIdentificationType();
+            data[9] = flightState.getPerson().getIdentification();
+            data[10] = flightState.getPerson().getAge();
+            data[11] = flightState.getPerson().getSex();
+            data[12] = flightState.getPerson().getWeight();
+            data[13] = flightState.getPerson().getPhoneNumber();
 
             //Add a new row.
             defaultTableModel.addRow(data);
@@ -233,7 +247,87 @@ public class FlightReservationControl extends JFrame {
                 J_OPTION_PANE_SHOW_CONFIRM_DIALOG_ALERT_TITLE, YES_NO_OPTION) == J_OPTION_PANE_SHOW_NO_OPTION)
             return;
 
-        flightReservation();
+        Object[] flightReservationFromJTable = selectedRow();
+
+        if(flightIsBusy(flightReservationFromJTable)){
+            JOptionPane.showMessageDialog(flightStatus, "The selected flight seat is already busy.");
+            return;
+        }
+
+        String dataValidation = dataValidation(flightReservationFromJTable);
+        if(!dataValidation.isEmpty()){
+            JOptionPane.showMessageDialog(flightStatus, "Please provide the following information: "
+                    + NEW_LINE + dataValidation);
+            dataValidation = EMPTY;
+            return;
+        }
+
+
+        if(flightReservation(selectedRow()))
+            JOptionPane.showMessageDialog(flightStatus, "The flight reservation was successful.");
+        else
+            JOptionPane.showMessageDialog(flightStatus, "There are a problem. Please contact the administrator.");
+
+        LoadDataOfJTable();
+    }
+
+    private boolean flightIsBusy(Object[] flightReservationFromJTable){
+        return flightReservationFromJTable[BUSY_INDEX].toString().equalsIgnoreCase(SI);
+    }
+
+    private String dataValidation(Object[] flightReservationFromJTable){
+        String messageInfo = EMPTY;
+        if(flightReservationFromJTable[4].toString().isEmpty()) {
+            messageInfo += "    + " + FIRST_NAME.getValue() + NEW_LINE;
+            messageInfo += NEW_LINE;
+        }
+
+        if(flightReservationFromJTable[6].toString().isEmpty()){
+            messageInfo += "    + " + FIRST_SURNAME.getValue() + NEW_LINE;
+            messageInfo += NEW_LINE;
+        }
+
+        if(!flightReservationFromJTable[8].toString().matches(IDENTIFICATION_TYPE_REGEX)){
+            messageInfo += "    + " + PERSON_ID_TYPE.getValue() + NEW_LINE;
+            messageInfo += "        - Please verify the document type. Allowed options are:" + NEW_LINE;
+            messageInfo += "            * CC  / Cédula de ciudadanía." + NEW_LINE;
+            messageInfo += "            * RCN / Regístro civil de nacimiento." + NEW_LINE;
+            messageInfo += "            * CE  / Cédula de extrangería." + NEW_LINE;
+            messageInfo += "            * PAS / Pasaporte." + NEW_LINE;
+            messageInfo += NEW_LINE;
+        }
+
+        if(flightReservationFromJTable[9].toString().isEmpty()){
+            messageInfo += "    + " + PERSON_ID.getValue() + NEW_LINE;
+            messageInfo += NEW_LINE;
+        }
+
+        if(!isNumeric(flightReservationFromJTable[10].toString())){
+            messageInfo += "    + " + AGE.getValue() + NEW_LINE;
+            messageInfo += "        - Please verify if Age is a number." + NEW_LINE;
+            messageInfo += NEW_LINE;
+        }
+
+        if(!flightReservationFromJTable[11].toString().matches(SEX_TYPE_REGEX)){
+            messageInfo += "    + " + SEX.getValue() + NEW_LINE;
+            messageInfo += "        - Please verify the sex type. Allowed options are:" + NEW_LINE;
+            messageInfo += "            * F  / Female." + NEW_LINE;
+            messageInfo += "            * M / Male." + NEW_LINE;
+            messageInfo += NEW_LINE;
+        }
+
+        if(!isNumeric(flightReservationFromJTable[12].toString())){
+            messageInfo += "    + " + WEIGHT.getValue() + NEW_LINE;
+            messageInfo += "        - Please verify if weight is a valid number." + NEW_LINE;
+            messageInfo += NEW_LINE;
+        }
+
+        if(flightReservationFromJTable[13].toString().isEmpty()){
+            messageInfo += "    + " + PHONE_NUMBER.getValue() + NEW_LINE;
+            messageInfo += NEW_LINE;
+        }
+
+        return messageInfo;
     }
 
     private void buildCancelReservationButton(){
@@ -256,11 +350,7 @@ public class FlightReservationControl extends JFrame {
             return;
 
         calcelReservation(ofSelectedRow());
-        loadFlightInfo();
-        buildInsertReservationButton();
-        buildCancelReservationButton();
-        buildUpdateReservationButton();
-        flightStatusInfo.repaint();
+        LoadDataOfJTable();
     }
 
     private String ofSelectedRow(){
@@ -292,6 +382,15 @@ public class FlightReservationControl extends JFrame {
             return;
 
         updateReserve();
+        LoadDataOfJTable();
+    }
+
+    private void LoadDataOfJTable() throws IOException {
+        loadFlightInfo();
+        buildInsertReservationButton();
+        buildCancelReservationButton();
+        buildUpdateReservationButton();
+        flightStatusInfo.repaint();
     }
 
 }

@@ -56,7 +56,7 @@
               <component id="9ce85" class="javax.swing.JTable" binding="flightStatusInfo">
                 <constraints/>
                 <properties>
-                  <autoCreateRowSorter value="true"/>
+                  <autoCreateRowSorter value="false"/>
                 </properties>
               </component>
             </children>

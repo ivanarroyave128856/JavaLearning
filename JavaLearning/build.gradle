@@ -13,7 +13,8 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.7'
-    testImplementation 'com.intellij:forms_rt:7.0.3'
+    implementation 'com.intellij:forms_rt:7.0.3'
+    implementation 'org.apache.commons:commons-lang3:3.5'
 }
 
 test {
