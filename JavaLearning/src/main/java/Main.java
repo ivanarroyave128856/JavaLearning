@@ -4,7 +4,6 @@ import static flightreservationsystem.features.applicationmanagement.countrymana
 import static flightreservationsystem.features.flightreservation.InsertReserve.flightReservation;
 import static flightreservationsystem.features.flightreservation.FlightState.flightStatus;
 import static flightreservationsystem.features.flightreservation.ShowTechnicalFlightDetail.showTechnicalFlightDetail;
-import static flightreservationsystem.features.flightreservation.UpdateReserve.updateReserve;
 import static flightreservationsystem.menues.ApplicationManagement.showCountryMenu;
 import static flightreservationsystem.menues.ApplicationManagement.showManagerMenu;
 import static flightreservationsystem.menues.FlightReservationMenu.showFlightReservation;
@@ -61,7 +60,7 @@ public class Main {
                     //flightReservation();
                     break;
                 case 4:
-                    updateReserve();
+                    //updateReserve();
                     break;
                 case 5:
                     //calcelReserve();

@@ -2,71 +2,86 @@ package flightreservationsystem.features.flightreservation;
 
 import com.google.gson.Gson;
 import flightreservationsystem.models.FlightStatus;
-
+import flightreservationsystem.models.Person;
+import flightreservationsystem.models.Seat;
 import java.io.IOException;
-import java.util.Scanner;
-
 import static flightreservationsystem.constants.Constants.CONTROL_FLIGHT_RESERVATION_JSON_PATH;
-import static flightreservationsystem.constants.Constants.NEW_LINE;
-import static flightreservationsystem.features.flightreservation.FlightState.flightStatus;
+import static flightreservationsystem.features.Core.getInfoOfFlight;
+import static flightreservationsystem.features.Core.saveChanges;
 import static flightreservationsystem.util.Util.getBasicFileContent;
 
 public class UpdateReserve {
-    public static void updateReserve() throws IOException {
-        flightStatus();
+    public static boolean updateTheFlightReservation(Object[] selectedRow) throws IOException {
 
-        System.out.println("****POR FAVOR INGRESE LA INFORMACIÓN SOLICITADA****" + NEW_LINE + NEW_LINE);
+        Seat seat = getInfoOfSeatFromScreen(selectedRow);
+        Person person = getInfoOfPersonFromScreen(selectedRow);
+        FlightStatus[] flightStatus = getInfoOfFlight();
 
-        Scanner in = new Scanner(System.in);
-        System.out.println("Ingrese el identificador de silla:");
-        String seatId = in.next();
+        saveChanges(withFollowingInformation(flightStatus, seat, person));
 
-        System.out.println("Ingrese el tipo de documento del cliente:");
-        String identificationType  = in.next();
-
-        System.out.println("Ingrese el número de documento del cliente:");
-        String identification  = in.next();
-
-        System.out.println(NEW_LINE + NEW_LINE);
-
-        FlightStatus flightStatus = getInfoOfOneFlight(getInfoOfFlight(), seatId, identificationType, identification);
-
-        if(flightStatus == null) {
-            System.out.println("No hay sillas asociadas" + NEW_LINE);
-            return;
-        }
-
-        showReservationStatus(flightStatus);
-
-
+        return verifyReservation(flightStatus);
     }
 
-    private static FlightStatus[] getInfoOfFlight() throws IOException {
+    private static Seat getInfoOfSeatFromScreen(Object[] selectedRow){
+        Seat seat = new Seat();
+        seat.setId(selectedRow[0].toString());
+        seat.setBusy(true);
+
+        return seat;
+    }
+
+    private static Person getInfoOfPersonFromScreen(Object[] selectedRow){
+        Person person = new Person();
+        person.setFirstName(selectedRow[4].toString());
+        person.setSecondName(selectedRow[5].toString());
+        person.setFirstSurname(selectedRow[6].toString());
+        person.setSecondSurname(selectedRow[7].toString());
+        person.setIdentificationType(selectedRow[8].toString());
+        person.setIdentification(selectedRow[9].toString());
+        person.setAge(Short.parseShort(selectedRow[10].toString()));
+        person.setSex(selectedRow[11].toString());
+        person.setWeight(Double.parseDouble(selectedRow[12].toString()));
+        person.setPhoneNumber(selectedRow[13].toString());
+
+        return person;
+    }
+
+    private static FlightStatus[] withFollowingInformation(FlightStatus[] flightStatus, Seat seat, Person person){
+        for (FlightStatus flightState : flightStatus) {
+            if(flightState.getSeat().getId().equalsIgnoreCase(seat.getId())) {
+                //Seat information.
+                flightState.getSeat().setBusy(seat.isBusy());
+                //Customer information..
+                flightState.getPerson().setIdentification(person.getIdentification());
+                flightState.getPerson().setIdentificationType(person.getIdentificationType());
+                flightState.getPerson().setFirstName(person.getFirstName());
+                flightState.getPerson().setSecondName(person.getSecondName());
+                flightState.getPerson().setFirstSurname(person.getFirstSurname());
+                flightState.getPerson().setSecondSurname(person.getSecondSurname());
+                flightState.getPerson().setAge(person.getAge());
+                flightState.getPerson().setSex(person.getSex());
+                flightState.getPerson().setWeight(person.getWeight());
+                flightState.getPerson().setPhoneNumber(person.getPhoneNumber());
+                break;
+            }
+        }
+        return flightStatus;
+    }
+
+    private static boolean verifyReservation(FlightStatus[] flightStatus) throws IOException {
         Gson gson = new Gson();
-        return gson.fromJson(
+        FlightStatus[] flgStatus = gson.fromJson(
                 getBasicFileContent(CONTROL_FLIGHT_RESERVATION_JSON_PATH),
                 FlightStatus[].class
         );
-    }
-
-    private static FlightStatus getInfoOfOneFlight(FlightStatus[] flightStatus,
-                                                   String seatId, String identificationType,
-                                                   String identification) throws IOException {
 
         for (FlightStatus flightState : flightStatus)
-            if(flightState.getSeat().getId().equalsIgnoreCase(seatId) &&
-                    flightState.getPerson().getIdentificationType().equalsIgnoreCase(identificationType) &&
-                    flightState.getPerson().getIdentification().equalsIgnoreCase(identification))
-                return flightState;
+            for (FlightStatus flgState : flgStatus)
+                if((flightState.getSeat().getId().equalsIgnoreCase(flgState.getSeat().getId()))
+                        && (flightState.getSeat().isBusy() == flgState.getSeat().isBusy()))
+                    return true;
 
-        return null;
-    }
-
-    private static void showReservationStatus(FlightStatus flightStatus){
-        System.out.println("****Resultado de búsqueda****" + NEW_LINE + NEW_LINE);
-        flightStatus.getSeat().getId();
-
-
+        return false;
     }
 
 }

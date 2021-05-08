@@ -13,7 +13,8 @@ import static flightreservationsystem.constants.ControlFlightReservationTitles.*
 import static flightreservationsystem.features.Core.getInfoOfFlight;
 import static flightreservationsystem.features.flightreservation.CancelReserve.calcelReservation;
 import static flightreservationsystem.features.flightreservation.InsertReserve.flightReservation;
-import static flightreservationsystem.features.flightreservation.UpdateReserve.updateReserve;
+import static flightreservationsystem.features.flightreservation.UpdateReserve.updateTheFlightReservation;
+import static flightreservationsystem.util.NumericValidation.isDouble;
 import static javax.swing.JOptionPane.YES_NO_OPTION;
 import static javax.swing.JOptionPane.showConfirmDialog;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -250,7 +251,7 @@ public class FlightReservationControl extends JFrame {
         Object[] flightReservationFromJTable = selectedRow();
 
         if(flightIsBusy(flightReservationFromJTable)){
-            JOptionPane.showMessageDialog(flightStatus, "The selected flight seat is already busy.");
+            JOptionPane.showMessageDialog(flightStatus, "The selected flight seat is already engaged.");
             return;
         }
 
@@ -316,9 +317,10 @@ public class FlightReservationControl extends JFrame {
             messageInfo += NEW_LINE;
         }
 
-        if(!isNumeric(flightReservationFromJTable[12].toString())){
+        if(!isDouble(flightReservationFromJTable[12].toString())){
             messageInfo += "    + " + WEIGHT.getValue() + NEW_LINE;
-            messageInfo += "        - Please verify if weight is a valid number." + NEW_LINE;
+            messageInfo += "        - Please verify if weight is a valid number. " + NEW_LINE +
+                    "Remember use comma (,) or dot (.) according to your region." + NEW_LINE;
             messageInfo += NEW_LINE;
         }
 
@@ -373,7 +375,7 @@ public class FlightReservationControl extends JFrame {
             }
         };
         flightStatusInfo.getColumn(UPDATE.getValue()).setCellRenderer(new ButtonRenderer(UPDATE.getValue()));
-        flightStatusInfo.getColumn(UPDATE.getValue()).setCellEditor(new ButtonEditor(new JCheckBox(), actionListener, CANCEL.getValue()));
+        flightStatusInfo.getColumn(UPDATE.getValue()).setCellEditor(new ButtonEditor(new JCheckBox(), actionListener, UPDATE.getValue()));
     }
 
     private void updateFlightReservation() throws IOException {
@@ -381,7 +383,26 @@ public class FlightReservationControl extends JFrame {
                 J_OPTION_PANE_SHOW_CONFIRM_DIALOG_ALERT_TITLE, YES_NO_OPTION) == J_OPTION_PANE_SHOW_NO_OPTION)
             return;
 
-        updateReserve();
+        Object[] flightReservationFromJTable = selectedRow();
+
+        if(!flightIsBusy(flightReservationFromJTable)){
+            JOptionPane.showMessageDialog(flightStatus, "The selected flight seat is empty. Please use the 'Insert' option.");
+            return;
+        }
+
+        String dataValidation = dataValidation(flightReservationFromJTable);
+        if(!dataValidation.isEmpty()){
+            JOptionPane.showMessageDialog(flightStatus, "Please provide the following information: "
+                    + NEW_LINE + dataValidation);
+            dataValidation = EMPTY;
+            return;
+        }
+
+        if(updateTheFlightReservation(selectedRow()))
+            JOptionPane.showMessageDialog(flightStatus, "The flight reservation was updated successful.");
+        else
+            JOptionPane.showMessageDialog(flightStatus, "There are a problem. Please contact the administrator.");
+
         LoadDataOfJTable();
     }
 
